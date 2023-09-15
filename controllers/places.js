@@ -120,6 +120,71 @@ router.delete('/:id', (req, res) => {
   res.send('DELETE /places/:id stub')
 })
 
+router.get('/:id/edit', (req, res) => {
+  db.Place.findById(req.params.id)
+      .then(place => {
+          res.render('places/edit', { place })
+      })
+      .catch(err => {
+          res.render('error404')
+      })
+})
+
+router.post('/', (req, res) => {
+  if (!req.body.pic) {
+    // Default image if one is not provided
+    req.body.pic = 'http://placekitten.com/400/400'
+  }
+
+  db.Place.create(req.body)
+  .then(() => {
+      res.redirect('/places')
+  })
+  .catch(err => {
+      console.log('err', err)
+      res.render('error404')
+  })
+})
+
+router.post('/', (req, res) => {
+  db.Place.create(req.body)
+  .then(() => {
+      res.redirect('/places')
+  })
+  .catch(err => {
+      if (err && err.name == 'ValidationError') {
+          // TODO: Generate error message(s)
+      }
+      else {
+          res.render('error404')
+      }
+  })
+})
+
+if (err && err.name == 'ValidationError') {
+  let message = 'Validation Error: '
+  
+  // Todo: Find all validation errors
+
+  res.render('places/new', { message })
+}
+else {
+  res.render('error404')
+}
+
+if (err && err.name == 'ValidationError') {
+  let message = 'Validation Error: '
+  for (var field in err.errors) {
+      message += `${field} was ${err.errors[field].value}. `
+      message += `${err.errors[field].message}`
+  }
+  console.log('Validation error message', message)
+  res.render('places/new', { message })
+}
+else {
+  res.render('error404')
+}
+
 
 module.exports = router
 
